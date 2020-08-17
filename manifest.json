@@ -1,0 +1,17 @@
+{
+  "name": "OK Zoomer",
+  "version": "1.0",
+  "description": "A clean, fast-access class portal, because modern problems require modern solutions.",
+  "permissions": ["storage", "notifications"],
+
+  "icons": {
+    "128": "icons/icon128.png",
+    "48": "icons/icon48.png",
+    "16": "icons/icon16.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon16.png",
+    "default_popup": "index.html"
+  },
+  "manifest_version": 2
+}

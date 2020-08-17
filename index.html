@@ -1,0 +1,75 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-grid.min.css">
+
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/js/bootstrap-datepicker.js"></script>
+
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <nav id="nav" class="navbar shadow p-3 mb-3 sticky-top" style="white-space: nowrap">
+        <span class="navbar-text">
+            <h1>OK Zoomer! <span id="randomemoji"></span></h1>
+        </span>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="lightswitch">
+            <label class="custom-control-label" for="lightswitch">Darkmode</label>
+        </div>
+
+        <div id="add" class="clickable float-right"> 
+        Add Meeting
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
+        </svg>
+        
+        </div>
+    </nav>
+
+    <div class="container input-group">
+        <input type="text" id="classId" placeholder="Meeting ID">
+        <input type="text" id="className" placeholder="Meeting Name">
+        <span class="input-group-btn">
+            <input class="btn btn-primary btn-sm" type="submit" id="enterClassId" value="Enter">
+        </span>
+        <div id="error-message" style="color: red"></div>
+    </div>
+
+    <br>
+    
+    <div id="classlist" class="container-fluid">
+        <div class="class row" id="1111111111">
+            <div class="col" style="white-space: normal;">testeasdftst</div>
+            <div class="col">
+                <button class="btn btn-primary btn-block join">111 111 1111</button>
+            </div>
+            <div class="col del clickable">&#128465;</div>
+            <br><br>
+        </div> 
+    </div>
+
+
+    <div class="clickable" id="cleardb">clear db (debug)</div>
+
+<footer class="page-footer font-small">
+  <div class="footer-copyright text-center py-2">
+    <div>@progammer | 
+    <span id="support" class="clickable">Support
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+        </svg>
+    </span>
+  </div>
+</footer>
+
+    
+
+</body>
+
+</html>
