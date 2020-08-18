@@ -5,4 +5,12 @@ trashicon
 </svg>
 
 
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+
+  
 https://icons.getbootstrap.com/
+
+https://stackoverflow.com/questions/3930199/how-to-run-a-jquery-or-javascript-before-page-start-to-load

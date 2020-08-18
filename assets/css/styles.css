@@ -47,10 +47,14 @@ body {
     word-wrap: break-word;
 }
 
-table td {
+table td, th {
     border-top: none !important;
 }
 
+table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
 *{
     -moz-user-select: -moz-none;
     -khtml-user-select: none;

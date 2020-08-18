@@ -20,14 +20,16 @@ $(function() {
     })
 
     // Display classes
-    chrome.storage.sync.get('classList', function(classes) {
-        if (classes.classList) {
-            var keys = Object.keys(classes.classList);
+    chrome.storage.sync.get({'classList': {}}, function(classes) {
+        var keys = Object.keys(classes.classList);
+        if (keys.length != 0) {
             keys.forEach((key, index) => {
                 console.log(`${key}: ${classes.classList[key].className}`);
                 addClassDisplay(classes.classList, key);
                 //$('#classlist').text(`${key}: ${classes[key]}`);
             });
+        } else {
+            $("#absence").html("It's lonely here :(<br>Add a zoom link to get started!")
         }
     })
 
@@ -65,6 +67,11 @@ $(function() {
                 delete currentClassList[classRow.id];
 
                 chrome.storage.sync.set({'classList': currentClassList}, function() {
+                    // visual update
+                    var keys = Object.keys(classes.classList);
+                    if (keys.length == 0) {
+                        $("#absence").html("It's lonely here :(<br>Add a zoom link to get started!")
+                    }
                     console.log('successfully removed meeting #' + classRow.id);
                 });
             }
@@ -124,6 +131,7 @@ $(function() {
                         className: $("#className").val() == "" ? "Zoom Meeting" : $("#className").val(),
                         classTimes: [],
                         password: "",
+                        notifications: false, // get in ternaries for all these
                     };
                     // database update
                     chrome.storage.sync.set({'classList': newClassList}, function() {
@@ -131,8 +139,9 @@ $(function() {
                     });
 
                     // visual update
-                    $('#addModal').modal('hide');
+                    $("#absence").html('');
                     addClassDisplay(newClassList, newClassId);
+                    $('#addModal').modal('hide');
                 }
             } else {
                 $('#error-message').text('Please enter a valid class ID!');
@@ -141,16 +150,17 @@ $(function() {
             $('#className').val('');
         })
     })
+
 })
 
 function addClassDisplay(classList, classId) {
     // Create div for the class: composed of button and breaks
     var classRow = document.createElement("tr");
-    classRow.className = "class";
+    classRow.className = "class d-flex align-items-center";
     classRow.setAttribute("id", classId);
 
     var classDescriptor = document.createElement("td");
-    classDescriptor.className = "align-center";
+    classDescriptor.className = "col-5 text-truncate text-center";
     classDescriptor.innerText = classList[classId].className;
 
     var classButton = document.createElement("button");
@@ -158,11 +168,15 @@ function addClassDisplay(classList, classId) {
     var mk2 = classId.length == 11 ? 7 : 6;
     classButton.innerText = classId.substring(0, 3) + " " + classId.substring(3, mk2)
     + " " + classId.substring(mk2, 11);
+    var temp = document.createElement("td");
+    temp.className = "col-5";
+    temp.appendChild(classButton);
+    classButton = temp;
     //classDiv.classList.add("join");
     
     // <div class="del col">&#128465;</div>
     var delButton = document.createElement("td");
-    delButton.className = "del clickable";
+    delButton.className = "col-2 del clickable";
     delButton.innerHTML = "&times;";
 
     classRow.appendChild(classDescriptor);
