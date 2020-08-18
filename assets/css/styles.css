@@ -13,7 +13,7 @@ body {
     transition: all 0.4s
 }
 
-.darkmode {
+.darkmode, #classlist.darkmode {
     background-color: #222;
     color: #FFF;
     transition: all 0.4s;
@@ -24,8 +24,9 @@ body {
     transition: all 0.4s;
 }
 
-#nav.darkmode, footer.darkmode { 
-    background-color: black; 
+#nav.darkmode, .modal-content.darkmode, footer.darkmode {
+    color: white; 
+    background-color: #111; 
     transition: all 0.4s;
 } 
 
@@ -46,6 +47,10 @@ body {
     word-wrap: break-word;
 }
 
+table td {
+    border-top: none !important;
+}
+
 *{
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
@@ -59,7 +64,9 @@ body {
     user-select: none;
  }
 
-
+.modal-backdrop {
+    z-index: 1020;
+}
 
 ::-webkit-scrollbar {
     width: 10px

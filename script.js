@@ -36,7 +36,7 @@ $(function() {
         var darkOn = style.darkOn;
         if (darkOn) {
             $('#lightswitch').prop('checked', true);
-            $('body, #nav, footer').addClass("darkmode");
+            $('body, #nav, #classlist, .modal-content, footer').addClass("darkmode");
         }
         chrome.storage.sync.set({'darkOn': darkOn}, function() {
             console.log('Darkmode started ' + darkOn);
@@ -51,7 +51,7 @@ $(function() {
                 console.log('changed to ' + darkOn);
             })
         })
-        $('body, #nav, footer').toggleClass("darkmode");
+        $('body, #nav, .modal-content, #classlist, footer').toggleClass("darkmode");
     });
 
      
@@ -76,7 +76,20 @@ $(function() {
     // Join class
     $("#classlist").on("click", ".join", function(){
         var classId = $(this).text().replace(/\s/g, '');
-        window.open(`zoommtg://zoom.us/join?action=join&confno=${classId}`);
+        var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
+
+        // Get potential password
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            
+            if (classes.classList.classId.password != "") {
+                console.log(classId + " has password: " + classes.classList.classId.password);
+                joinLink += `&pwd=${classes.classList.classId.password}`;
+            } else {
+                console.log('no password');
+            }
+        })
+
+        window.open(joinLink);
     });
 
     // Enter key procs submit
@@ -109,11 +122,16 @@ $(function() {
                 } else {
                     newClassList[newClassId] = {
                         className: $("#className").val() == "" ? "Zoom Meeting" : $("#className").val(),
-                        classTimes: []
+                        classTimes: [],
+                        password: "",
                     };
+                    // database update
                     chrome.storage.sync.set({'classList': newClassList}, function() {
                         console.log('classList has been updated: added ' + newClassId);
                     });
+
+                    // visual update
+                    $('#addModal').modal('hide');
                     addClassDisplay(newClassList, newClassId);
                 }
             } else {
@@ -127,36 +145,30 @@ $(function() {
 
 function addClassDisplay(classList, classId) {
     // Create div for the class: composed of button and breaks
-    var classDiv = document.createElement("div");
-    classDiv.className = "class row";
-    classDiv.setAttribute("id", classId);
+    var classRow = document.createElement("tr");
+    classRow.className = "class";
+    classRow.setAttribute("id", classId);
 
-    var classDescriptor = document.createElement("div");
+    var classDescriptor = document.createElement("td");
+    classDescriptor.className = "align-center";
     classDescriptor.innerText = classList[classId].className;
 
     var classButton = document.createElement("button");
-    classButton.className = "btn btn-primary join";
+    classButton.className = "btn btn-primary btn-block join";
     var mk2 = classId.length == 11 ? 7 : 6;
     classButton.innerText = classId.substring(0, 3) + " " + classId.substring(3, mk2)
     + " " + classId.substring(mk2, 11);
     //classDiv.classList.add("join");
     
     // <div class="del col">&#128465;</div>
-    var delButton = document.createElement("div");
-    delButton.className = "col del clickable";
-    delButton.innerHTML = "&#128465;";
+    var delButton = document.createElement("td");
+    delButton.className = "del clickable";
+    delButton.innerHTML = "&times;";
 
-    classDiv.appendChild(wrapInColDiv(classDescriptor));
-    classDiv.appendChild(wrapInColDiv(classButton));
-    classDiv.appendChild(delButton);
-    classDiv.appendChild(document.createElement("br"));
-    classDiv.appendChild(document.createElement("br"));
-    $("#classlist").append(classDiv);
+    classRow.appendChild(classDescriptor);
+    classRow.appendChild(classButton);
+    classRow.appendChild(delButton);
+    $("#classlist").append(classRow);
 }
 
-function wrapInColDiv(element) {
-    var div = document.createElement("div");
-    div.className = "col";
-    div.appendChild(element);
-    return div;
-}
+

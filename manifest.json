@@ -13,5 +13,6 @@
     "default_icon": "icons/icon16.png",
     "default_popup": "index.html"
   },
+
   "manifest_version": 2
 }
