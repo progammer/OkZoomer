@@ -1,7 +1,7 @@
 {
   "name": "OK Zoomer",
   "version": "1.0",
-  "description": "A clean, fast-access class portal, because modern problems require modern solutions.",
+  "description": "Clean, fast-access portal for zoom meetings. ",
   "permissions": ["storage", "notifications"],
 
   "icons": {
@@ -13,6 +13,9 @@
     "default_icon": "icons/icon16.png",
     "default_popup": "index.html"
   },
-
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
   "manifest_version": 2
 }

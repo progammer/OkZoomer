@@ -14,3 +14,37 @@ trashicon
 https://icons.getbootstrap.com/
 
 https://stackoverflow.com/questions/3930199/how-to-run-a-jquery-or-javascript-before-page-start-to-load
+
+
+        <div class="modal fade" id="addModal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title">Add Meeting</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&#10060;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="md-form">
+                    <i class="fas fa-envelope prefix grey-text"></i>
+                    <input type="text" id="classId" class="form-control validate">
+                    <label data-error="wrong" data-success="right" for="classId">Meeting</label>
+                    </div>
+
+                    <div class="md-form">
+                    <i class="fas fa-lock prefix grey-text"></i>
+                    <input type="text" id="className" class="form-control validate">
+                    <label data-error="wrong" data-success="right" for="className">Your password</label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer d-flex justify-content-center">
+                    <span id="error-message" style="color: red"></span>
+                    <button class="btn btn-primary btn-sm" id="enterClassId">Enter</button>
+                </div>
+
+            </div>
+        </div>
+        </div>

@@ -3,16 +3,19 @@
     <title>OK Zoomer Chrome Extension</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <script src="assets/js/jquery-3.5.1.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="script.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/mdb.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+    <script type="text/javascript" src="assets/js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="assets/js/popper.min.js"></script>
+    <script type="text/javascript" src="assets/js/mdb.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
 </head>
 
-<body style="width:360px">
-    
-    <nav id="nav" class="navbar shadow p-3 mb-3 sticky-top" style="white-space: nowrap">
+<body>
+    <nav id="nav" class="navbar shadow sticky-top" style="white-space: nowrap">
         <span class="navbar-text">
             <h1>OK Zoomer!<span id="randomemoji"></span></h1>
         </span>
@@ -21,57 +24,125 @@
             <label class="custom-control-label" for="lightswitch">Darkmode</label>
         </div>
 
-        <div id="add" class="clickable float-right" data-toggle="modal" data-target="#addModal">
-        Add Meeting
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
-        </svg>
-        </div>
-
-    <div class="modal fade shadow" id="addModal" data-backdrop="false">
-        <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow">
-            <div class="modal-header">
-            <h4 class="modal-title">Add Meeting</h4>
-            <button type="button" class="close" data-dismiss="modal">
-                &#10060;
-            </button>
+        <div style="display:flex; width:100%; margin: 0 auto">
+            <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
+                    <div id="add" class="clickable" style="text-align:left" data-toggle="modal" data-target="#addModal">
+                         Add Meeting <i class="fas fa-plus"></i>
+                    </div>
             </div>
+            <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
+                    <div id="cleardb" class="clickable" style="text-align:right">
+                        Clear all <i class="far fa-trash-alt"></i>
+                    </div>
+            </div>
+        </div>
             
-            <div class="modal-body">
-                <div class="container">
-                    <input type="text" id="classId" placeholder="Meeting ID (required)">
-                    <input type="text" id="className" placeholder="Meeting Name">
+        <div class="modal fade" id="addModal" role="dialog" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="width:75%">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Meeting</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i> 
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="md-form">
+                    <i class="fas fa-hashtag prefix grey-text"></i>
+                    <input type="text" id="classId" class="form-control">
+                    <label for="classId">Meeting ID (required)</label>
+                    </div>
+
+                    <div class="md-form">
+                    <i class="fas fa-pencil-alt prefix grey-text"></i>
+                    <input type="text" id="className" class="form-control">
+                    <label for="className">Meeting Name</label>
+                    </div>
+
+                    <button class="btn btn-primary btn-sm" id="enterClassId">Submit</button>
+                    <span id="error-message" style="color: red"></span> 
                 </div>
             </div>
-            
-            <div class="modal-footer">
-            <span id="error-message" style="color: red"></span>
-            <button class="btn btn-primary btn-sm" id="enterClassId">Enter</button>
-            </div>
         </div>
         </div>
-    </div>
     </nav>
 
-    <div id="absence" class="text-center"></div>
-    <table id="classlist" class="table">
-    </table>
+    <div id="main">
+        <div id="absence" class="text-center">It's lonely here :(<br>Add a zoom link to get started!</div>
+        <table id="classlist" class="table">
+        </table>
+    </div>
 
-    <div class="clickable" id="cleardb">Clear all meetings (requires reload)</div>
+    <div class="modal fade" role="dialog" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div id="editmodal" class="modal-content" style="width:85%">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Preferences</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i> 
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <select id="dayselect" class="form-control form-control-sm">
+                        <option value="-1">--</option>
+                        <option value="0">Sunday</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                    </select>
 
-<footer class="page-footer font-small">
-  <div class="footer-copyright text-center py-2">
-    <div>@progammer | 
-    <span id="support" class="clickable">Support
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-        </svg>
-    </span>
-  </div>
-</footer>
+
+                    <input type="time" id="schedule">
+                    <button class="btn btn-primary btn-sm" id="savetime">Save Time</button>
+                    <span id="savetimemsg"></span><br>
+
+                    <i class="fas fa-calendar prefix grey-text"></i> Saved Meeting Times<span id="notimes"> - None Yet!</span>
+                    <ul id="scheduledtimes" class="list-group list-group-flush">
+                    </ul>
+
+                    <div class="md-form">
+                        <i class="fas fa-key prefix grey-text"></i>
+                        <input type="text" id="password" class="form-control">
+                        <label for="password">Password</label>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="savepass">Save Password</button>
+                    <span id="savepassmsg"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="font-small">
+        <div>brought to you by @progammer | 
+            <span id="support" class="clickable" data-toggle="modal" data-target="#supportModal">
+                Support <i class="fas fa-heart"></i>
+            </span>
+        </div>
+    </footer>
  
-
+    <div class="modal fade" id="supportModal" role="dialog" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="width:75%">
+                <div class="modal-header">
+                    <h4 class="modal-title">Support</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i> 
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>If you are enjoying the app and have the means to make a financial contribution, my venmo is @caleb_park</p>
+                    <p>Alternatively, you can <a href="">leave a review</a>, share, or suggest improvements.
+                    <p><a href="https://github.com/progammer/OkZoomer" target="_blank">Source</a> if you are a fellow developer.</p>
+                    <p>Thank you again for installing!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

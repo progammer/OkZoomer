@@ -1,6 +1,4 @@
-const sleep = (milliseconds) => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds))
-  }
+var intervalTimeInMs = 3000; // 60000 minute
 
 setInterval(function() { 
     var notifOptions = {
@@ -11,12 +9,11 @@ setInterval(function() {
         contextMessage:"OK Zoomer"	
 
     };
-    chrome.notifications.create("remindnotif", notifOptions);
-    //alert("seconds have passed"); 
-    console.log('TICK');
-    sleep(2000).then(() => {
-        console.log('slept for 2 seconds')
-        chrome.notifications.clear("remindnotif");
-    })
+    // chrome.notifications.create("remindnotif", notifOptions);
+    var now = new Date();
+    var day = now.getDay();
+    var time = now.getDay() + ":" + now.getHours() + ":" + now.getMinutes(); // + ":" + now.getSeconds();
+    console.log("today is " + day + ", " + time);
 
-}, 3000);
+    // check every minute
+}, intervalTimeInMs);

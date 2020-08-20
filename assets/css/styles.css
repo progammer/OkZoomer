@@ -7,21 +7,39 @@
 }
 
 body {
+    font-family: DM Sans;
     background-color: #FFF;
     color: #222;
-    font-family: DM Sans;
-    transition: all 0.4s
+    width:480px;
+    height:480px;
+    transition: all 0.4s;
 }
 
-.darkmode, #classlist.darkmode {
+#main {
+    padding-bottom: 25px;
+}
+
+.darkmode, .table.darkmode, .modal-content.darkmode .classtime{
     background-color: #222;
     color: #FFF;
     transition: all 0.4s;
 }
 
-#nav, footer {
+footer {
+    color: #222;
     background-color: white;
+    padding:10px;
+    border-top: 1px solid grey;
+    text-align: center;
+    position:fixed;
+    bottom:0;
+    width:100%;
     transition: all 0.4s;
+}
+
+footer.darkmode {
+    border-top: 1px solid black;
+    transition: all 0.2s;
 }
 
 #nav.darkmode, .modal-content.darkmode, footer.darkmode {
@@ -38,7 +56,14 @@ body {
     white-space: nowrap;
 }
 
-#classlist {
+#absence {
+    display:flex;
+    height:60%;
+    align-items:center;
+    justify-content:center;
+}
+
+.table {
     display: table;
     width: 100%;
 }
@@ -46,6 +71,28 @@ body {
 #classname {
     word-wrap: break-word;
 }
+
+.modal-content {
+    margin: auto;
+}
+
+.modal-header {
+    margin-bottom: none;
+}
+
+.modal-content.darkmode .close {
+    color: white;
+    opacity: 1;
+}
+
+.modal-content.darkmode .modal-header {
+    border-bottom:0 none;
+}
+
+.modal-content.darkmode .modal-body {
+    background-color: #222;
+}
+
 
 table td, th {
     border-top: none !important;
@@ -86,4 +133,20 @@ table {
     background-color: #fff;
     border-radius: 10px;
     background: transparent;
+}
+
+#schedule:focus {outline:none;}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.modal-content.darkmode .form-control:focus {
+    border: none;
+}
+
+.modal-content.darkmode #schedule, .modal-content.darkmode .form-control {
+    border: none;
+    color: white;
+    background-color: #888;
 }

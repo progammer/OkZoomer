@@ -7,29 +7,22 @@ $(function() {
 
     $('#cleardb').click(function() {
         chrome.storage.sync.clear(function() {
-            console.log('cleared db');
+            window.close('','_parent','');
         })
-    })
-
-    $('#support').click(function() {
-
-    })
-
-    $('#myModal').on('shown.bs.modal', function () {
-        $('#myInput').trigger('focus')
     })
 
     // Display classes
     chrome.storage.sync.get({'classList': {}}, function(classes) {
         var keys = Object.keys(classes.classList);
         if (keys.length != 0) {
+            $("#absence").css('display', 'none');
             keys.forEach((key, index) => {
                 console.log(`${key}: ${classes.classList[key].className}`);
                 addClassDisplay(classes.classList, key);
                 //$('#classlist').text(`${key}: ${classes[key]}`);
             });
         } else {
-            $("#absence").html("It's lonely here :(<br>Add a zoom link to get started!")
+            $("#absence").css('display', 'flex');
         }
     })
 
@@ -38,7 +31,7 @@ $(function() {
         var darkOn = style.darkOn;
         if (darkOn) {
             $('#lightswitch').prop('checked', true);
-            $('body, #nav, #classlist, .modal-content, footer').addClass("darkmode");
+            $('body, #nav, .table, .modal-content, footer').addClass("darkmode");
         }
         chrome.storage.sync.set({'darkOn': darkOn}, function() {
             console.log('Darkmode started ' + darkOn);
@@ -49,11 +42,9 @@ $(function() {
     $('#lightswitch').click(function() {
         chrome.storage.sync.get({'darkOn': true}, function(style) {
             var darkOn = !style.darkOn;
-            chrome.storage.sync.set({'darkOn': darkOn}, function() {
-                console.log('changed to ' + darkOn);
-            })
+            chrome.storage.sync.set({'darkOn': darkOn});
         })
-        $('body, #nav, .modal-content, #classlist, footer').toggleClass("darkmode");
+        $('body, #nav, .modal-content, .table, footer').toggleClass("darkmode");
     });
 
      
@@ -70,7 +61,7 @@ $(function() {
                     // visual update
                     var keys = Object.keys(classes.classList);
                     if (keys.length == 0) {
-                        $("#absence").html("It's lonely here :(<br>Add a zoom link to get started!")
+                        $("#absence").css('display', 'flex');
                     }
                     console.log('successfully removed meeting #' + classRow.id);
                 });
@@ -85,17 +76,18 @@ $(function() {
         var classId = $(this).text().replace(/\s/g, '');
         var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
 
+        /** 
         // Get potential password
         chrome.storage.sync.get({'classList': {}}, function(classes) {
-            
-            if (classes.classList.classId.password != "") {
-                console.log(classId + " has password: " + classes.classList.classId.password);
-                joinLink += `&pwd=${classes.classList.classId.password}`;
+            classList = classes.classList;
+            if (classList[classId].password != "") {
+                console.log(classId + " has password: " + classList[classId].password);
+                joinLink += `&pwd=${classList[classId].password}`;
             } else {
                 console.log('no password');
             }
         })
-
+        */
         window.open(joinLink);
     });
 
@@ -125,33 +117,163 @@ $(function() {
                 // Check if class id was already registered
                 if (newClassList.hasOwnProperty(newClassId)) {
                     console.log('class ' + newClassId + ' already exists');
-                    $('#error-message').text('The class ID already exists!');
+                    $('#error-message').text('Meeting ID already exists!');
                 } else {
                     newClassList[newClassId] = {
                         className: $("#className").val() == "" ? "Zoom Meeting" : $("#className").val(),
                         classTimes: [],
                         password: "",
-                        notifications: false, // get in ternaries for all these
+                        notifications: false,
                     };
+
                     // database update
                     chrome.storage.sync.set({'classList': newClassList}, function() {
                         console.log('classList has been updated: added ' + newClassId);
                     });
 
                     // visual update
-                    $("#absence").html('');
+                    $("#absence").css('display', 'none');
                     addClassDisplay(newClassList, newClassId);
                     $('#addModal').modal('hide');
                 }
             } else {
-                $('#error-message').text('Please enter a valid class ID!');
+                $('#error-message').text('Please enter a valid ID!');
             }
+            // for each value "" ... of modal form
             $('#classId').val('');
             $('#className').val('');
         })
     })
 
+    // $(selector).event is directly bound
+    // .on creates a delegated binding for newly generated items
+
+    // $('#staticParent').on('click', '.dynamicElement', function() {
+    // Do something on an existent or future .dynamicElement
+    // });
+
+    $("#classlist").on("keypress", ".namedisplay", function(e) {
+        if (e.which == '13') {
+            // blur the textbox
+            $(this).children()[0].blur();
+            //e.preventDefault();
+        }
+    });
+
+    $("#classlist").on("focusout", ".namedisplay", function() {
+        var classId = $(this).parent()[0].id;
+        var updatedName = $(this).text();
+        saveName(classId, updatedName);
+    });
+
+    // Preferences for meetings [load]
+    $('#classlist').on("click", ".edit", function() {
+        var parentId = $(this).parent()[0].id;
+        var previousId = $('#editmodal').prop('name');
+        // prevent unnecessary reloading bc rerender on each delete and add to preserve accuracy of name indices
+        if (parentId != previousId) {
+            $('#editmodal').prop('name', parentId); // content block
+            $('#editmodal').children(".modal-header").children(".modal-title").text('Editing #' + parentId);
+            chrome.storage.sync.get({'classList': {}}, function(classes) {
+                var classList = classes.classList;
+                if (classList[parentId]) {
+                    $('#editmodal').children(".modal-body").children(".modal-title").text('Editing #' + parentId);
+                    if(classList[parentId].classTimes.length != 0) {
+                        $('#notimes').hide();
+                        for (var i = 0; i < classList[parentId].classTimes.length; i++) {
+                            var dayElement = document.createElement("li");
+                            dayElement.className = "classtime clickable list-group-item";
+                            dayElement.name = i;
+                            var fTime = classList[parentId].classTimes[i].split(":");
+                            fTime = getWeekday(fTime[0]) + " @ " + fTime[1]%12 + ":" + fTime[2] + " " + (fTime[1]/12 ? "AM" : "PM"); // :)
+                            dayElement.innerText = fTime;
+                            $('#editmodal').children(".modal-body").children("#scheduledtimes")[0].appendChild(dayElement);
+                        }
+                    }
+                }
+            })
+        }
+        $('#editmodal').closest('.modal').modal('toggle');
+    })
+
+    // remove a classtime
+    $('#editmodal').on('click', '.classtime', function () {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var clickedIndex = $(this).prop('name');
+            var parentId = $(this).closest("#editmodal").prop('name');
+            
+            // database update
+            if (classes.classList[parentId].classTimes) {
+                var updatedClassList = classes.classList;
+                console.log(updatedClassList[parentId].classList);
+                updatedClassList[parentId].classTimes.splice(clickedIndex, 1);
+                console.log(updatedClassList[parentId].classList);
+                chrome.storage.sync.set({'classList': updatedClassList});
+            }
+            //visual update
+            if (updatedClassList[parentId].classTimes.length == 0) {
+                $('#notimes').show();
+            }
+ 
+            $('.classtime').prop('name', clickedIndex)[clickedIndex].remove();
+        })
+
+    });
+
+    // add a classtime
+    $('#savetime').click(function() {
+        var editedId = $(this).closest('#editmodal').prop('name');
+        var day = $("#dayselect option:selected").val(); // -1 if invalid
+        var time = $("#schedule").val(); // blank string if invalid
+        if (day != -1 && time) {
+            chrome.storage.sync.get({'classList': {}}, function(classes) {
+                var fTime = day + ":" + time;//formatted time is dayIndex:hour:minute
+                console.log(fTime);
+                console.log(classes.classList[editedId].classTimes);
+                console.log(classes.classList[editedId].classTimes.includes(fTime));
+                // only add if not already included
+                if (!classes.classList[editedId].classTimes.includes(fTime)) {
+                    var updatedClassList = classes.classList;
+                    // db update
+                    updatedClassList[editedId].classTimes.push(fTime);
+                    chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                        // visual update
+                        $("#savetimemsg").css("color", "#1E90FF");
+                        $("#savetimemsg").text("Saved time!");
+                    });
+                } else {
+                    $("#savetimemsg").css("color", "red");
+                    $("#savetimemsg").text("Already exists!");
+                }
+            })
+        } else {
+            $("#savetimemsg").css("color", "red");
+            $("#savetimemsg").text("Invalid time!");
+        }
+    })
 })
+
+function getWeekday(dayIndex) {
+    var weekday = new Array(7);
+    weekday[0] = "Sunday";
+    weekday[1] = "Monday";
+    weekday[2] = "Tuesday";
+    weekday[3] = "Wednesday";
+    weekday[4] = "Thursday";
+    weekday[5] = "Friday";
+    weekday[6] = "Saturday";
+    return weekday[dayIndex];
+}
+
+function saveName(classId, updatedName) {
+    chrome.storage.sync.get({'classList': {}}, function(classes) {
+        if (classes.classList.hasOwnProperty(classId)) {
+            var updatedClassList = classes.classList;
+            updatedClassList[classId].className = updatedName;
+            chrome.storage.sync.set({'classList': updatedClassList});
+        }
+    })
+}
 
 function addClassDisplay(classList, classId) {
     // Create div for the class: composed of button and breaks
@@ -160,11 +282,16 @@ function addClassDisplay(classList, classId) {
     classRow.setAttribute("id", classId);
 
     var classDescriptor = document.createElement("td");
-    classDescriptor.className = "col-5 text-truncate text-center";
-    classDescriptor.innerText = classList[classId].className;
+    classDescriptor.className = "col-5 text-truncate text-center namedisplay";
+    var nameDiv = document.createElement("div");
+    nameDiv.setAttribute('contenteditable', 'true');
+    nameDiv.setAttribute('spellcheck', 'false');
+    nameDiv.innerText = classList[classId].className;
+    classDescriptor.appendChild(nameDiv);
 
     var classButton = document.createElement("button");
     classButton.className = "btn btn-primary btn-block join";
+    classButton.style = "display: flex;align-items: center;justify-content: center;";
     var mk2 = classId.length == 11 ? 7 : 6;
     classButton.innerText = classId.substring(0, 3) + " " + classId.substring(3, mk2)
     + " " + classId.substring(mk2, 11);
@@ -172,17 +299,18 @@ function addClassDisplay(classList, classId) {
     temp.className = "col-5";
     temp.appendChild(classButton);
     classButton = temp;
-    //classDiv.classList.add("join");
-    
-    // <div class="del col">&#128465;</div>
+
     var delButton = document.createElement("td");
-    delButton.className = "col-2 del clickable";
-    delButton.innerHTML = "&times;";
+    delButton.className = "col-1 del clickable";
+    delButton.innerHTML = '<i class="fas fa-minus-circle"></i>';
+
+    var editButton = document.createElement("td");
+    editButton.className = "col-1 edit clickable";
+    editButton.innerHTML = '<i class="fas fa-cog"></i>';
 
     classRow.appendChild(classDescriptor);
     classRow.appendChild(classButton);
     classRow.appendChild(delButton);
+    classRow.appendChild(editButton);
     $("#classlist").append(classRow);
 }
-
-
