@@ -1,6 +1,7 @@
 # OkZoomer
-Modern problems require modern solutions. Unfortunately, recent events - such as COVID-19 :( - have caused education to be adapted to a virtual format. An annoying problem I faced last semester was navigating through different portals (email, canvas, announcements) to retrieve Zoom meeting links.
-To mitigate this hassle, here is a Google Chrome Extension that serves as a portal to these classes. 
+Unfortunately, recent events - such as COVID-19 :( - have caused education to be adapted to a virtual format. An annoying problem I faced last semester was navigating through different portals (email and canvas) to retrieve Zoom meeting links to my classes. Modern problems require modern solutions - so I built this chrome extension to mitigate this hassle. 
+
+This is my first major project dealing in HTML/CSS/JS [apologizes for bad code], and I would appreciate anyone more experienced than me to review it.
 
 ## Workflow
 - Select the folder containing resources + manifest file for extension
