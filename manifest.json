@@ -1,7 +1,7 @@
 {
   "name": "OK Zoomer",
-  "version": "1.0",
-  "description": "Clean, fast-access portal for zoom meetings. ",
+  "version": "1.1",
+  "description": "OK Zoomer is a clean and lightweight portal for accessing Zoom meetings.",
   "permissions": ["storage", "notifications"],
 
   "icons": {
@@ -15,7 +15,7 @@
   },
   "background": {
     "scripts": ["background.js"],
-    "persistent": false
+    "persistent": true
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "manifest_version": 2

@@ -8,6 +8,7 @@ This is my first major project dealing in HTML/CSS/JS [apologizes for any subpar
 - chrome://extensions > Load Unpacked
 
 ## Usage
-- Navigate to the Chrome web Store
+- Navigate to the Chrome Web Store
 - Search for "OK Zoomer"
+- (or if this link works: https://chrome.google.com/webstore/detail/ok-zoomer/jbnbkdnmmdndfglombmgmbccfccjkidg)
 - Install and Use
