@@ -1,5 +1,6 @@
 // Submits -> Set Chrome API -> Chrome Storage -> Get Chrome API (repeat)
 $(function() {
+
     var emojis = Array('&#128526;','&#9996;','&#129321;','&#129297;');
     //get random effect from effects array
     var emoji = emojis[Math.floor(Math.random()*emojis.length)];
@@ -16,8 +17,8 @@ $(function() {
         var keys = Object.keys(classes.classList);
         if (keys.length != 0) {
             $("#absence").css('display', 'none');
-            keys.forEach((key, index) => {
-                console.log(`${key}: ${classes.classList[key].className}`);
+            keys.forEach((key) => {
+                console.log(`${key}: ${classes.classList[key].password}`);
                 addClassDisplay(classes.classList, key);
                 //$('#classlist').text(`${key}: ${classes[key]}`);
             });
@@ -68,7 +69,7 @@ $(function() {
             }
         })
         // visual update
-        classRow.remove(".class");
+        classRow.remove();
     })
 
     // Join class
@@ -76,19 +77,15 @@ $(function() {
         var classId = $(this).text().replace(/\s/g, '');
         var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
 
-        /** 
         // Get potential password
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             classList = classes.classList;
-            if (classList[classId].password != "") {
-                console.log(classId + " has password: " + classList[classId].password);
-                joinLink += `&pwd=${classList[classId].password}`;
-            } else {
-                console.log('no password');
-            }
+            var password = classList[classId].password;
+            joinLink += password ? `&pwd=${password}` : "";
+            window.open(joinLink);
         })
-        */
-        window.open(joinLink);
+
+        // chrome get asynchronous cannot define behavior/modify link to join 'after'
     });
 
     // Enter key procs submit
@@ -123,7 +120,8 @@ $(function() {
                         className: $("#className").val() == "" ? "Zoom Meeting" : $("#className").val(),
                         classTimes: [],
                         password: "",
-                        notifications: false,
+                        autojoin: false,
+                        remind: false, // future: implement customizable value
                     };
 
                     // database update
@@ -166,80 +164,121 @@ $(function() {
         saveName(classId, updatedName);
     });
 
-    // Preferences for meetings [load]
+    // Toggle the edit menu
     $('#classlist').on("click", ".edit", function() {
-        var parentId = $(this).parent()[0].id;
-        var previousId = $('#editmodal').prop('name');
-        // prevent unnecessary reloading bc rerender on each delete and add to preserve accuracy of name indices
+        var parentId = $(this).parent()[0].id; // class [classrow] id
+        var previousId = $('#editmodal').prop('name'); 
+        // prevent unnecessary reloading
         if (parentId != previousId) {
+            // previous items: set filled values to default values
+            $('#scheduledtimes').empty();
+            $('#password').attr("value", "");
+            $('#autojointoggle').prop('checked', false);
+            $('#remindtoggle').prop('checked', false);
+            // Render the edit menu 
             $('#editmodal').prop('name', parentId); // content block
             $('#editmodal').children(".modal-header").children(".modal-title").text('Editing #' + parentId);
+            console.log('Currently editing #' + $('#editmodal').prop('name'));
             chrome.storage.sync.get({'classList': {}}, function(classes) {
-                var classList = classes.classList;
-                if (classList[parentId]) {
-                    $('#editmodal').children(".modal-body").children(".modal-title").text('Editing #' + parentId);
-                    if(classList[parentId].classTimes.length != 0) {
-                        $('#notimes').hide();
-                        for (var i = 0; i < classList[parentId].classTimes.length; i++) {
-                            var dayElement = document.createElement("li");
-                            dayElement.className = "classtime clickable list-group-item";
-                            dayElement.name = i;
-                            var fTime = classList[parentId].classTimes[i].split(":");
-                            fTime = getWeekday(fTime[0]) + " @ " + fTime[1]%12 + ":" + fTime[2] + " " + (fTime[1]/12 ? "AM" : "PM"); // :)
-                            dayElement.innerText = fTime;
-                            $('#editmodal').children(".modal-body").children("#scheduledtimes")[0].appendChild(dayElement);
-                        }
-                    }
+                var meeting = classes.classList[parentId];
+                if (meeting.autojoin) {
+                    $('#autojointoggle').prop('checked', true);
+                }
+                if (meeting.remind) {
+                    $('#remindtoggle').prop('checked', true);
+                }
+                if (meeting.password) {
+                    $('#password').attr("spellcheck", false);
+                    $('#password').attr("value", meeting.password);
+                    // the following is included so the label rides above 
+                    $('#password').select();
+                    $('#password').blur();
                 }
             })
+            renderSchedule(parentId);
         }
         $('#editmodal').closest('.modal').modal('toggle');
     })
+
+    function renderSchedule(classId) {
+        $('#scheduledtimes').empty();
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var meeting = classes.classList[classId];
+            if(meeting.classTimes.length != 0) {
+                $('#notimes').hide();
+                for (var i = 0; i < meeting.classTimes.length; i++) {
+                    var timeElement = document.createElement("li");
+                    timeElement.className = "classtime clickable list-group-item";
+                    timeElement.setAttribute("name", i);
+                    var fTime = formatTime(meeting.classTimes[i].split(":"));
+                    timeElement.innerText = fTime;
+                    $("#scheduledtimes")[0].appendChild(timeElement);
+                }
+            }
+        })
+    }
+
+    $('#autojointoggle').click(function() {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var updatedClassList = classes.classList;
+            var editedId = $('#editmodal').prop('name');
+            updatedClassList[editedId].autojoin = !classes.classList[editedId].autojoin;
+            chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                console.log(editedId + " now has auto join set to " + updatedClassList[editedId].autojoin);
+            })
+        })
+    });
+
+    $('#remindtoggle').click(function() {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var updatedClassList = classes.classList;
+            var editedId = $('#editmodal').prop('name');
+            updatedClassList[editedId].remind = !classes.classList[editedId].remind;
+            chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                console.log(editedId + " now has remind set to " + updatedClassList[editedId].autojoin);
+            })
+        })
+    });
 
     // remove a classtime
     $('#editmodal').on('click', '.classtime', function () {
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             var clickedIndex = $(this).prop('name');
-            var parentId = $(this).closest("#editmodal").prop('name');
+            var parentId = $('#editmodal').prop('name');
             
             // database update
-            if (classes.classList[parentId].classTimes) {
-                var updatedClassList = classes.classList;
-                console.log(updatedClassList[parentId].classList);
-                updatedClassList[parentId].classTimes.splice(clickedIndex, 1);
-                console.log(updatedClassList[parentId].classList);
-                chrome.storage.sync.set({'classList': updatedClassList});
-            }
-            //visual update
-            if (updatedClassList[parentId].classTimes.length == 0) {
-                $('#notimes').show();
-            }
- 
-            $('.classtime').prop('name', clickedIndex)[clickedIndex].remove();
-        })
 
+            console.log('removing ' + clickedIndex + ' from ' + parentId);
+            if (classes.classList[parentId]) {
+                // db update
+                var updatedClassList = classes.classList;
+                updatedClassList[parentId].classTimes.splice(clickedIndex, 1);
+                chrome.storage.sync.set({'classList': updatedClassList});
+                renderSchedule(parentId);
+            }
+            //$(this).remove();
+            //$('.classtime').prop('name', clickedIndex)[clickedIndex].remove();
+        })
     });
 
     // add a classtime
     $('#savetime').click(function() {
-        var editedId = $(this).closest('#editmodal').prop('name');
+        var editedId = $('#editmodal').prop('name');
         var day = $("#dayselect option:selected").val(); // -1 if invalid
         var time = $("#schedule").val(); // blank string if invalid
         if (day != -1 && time) {
             chrome.storage.sync.get({'classList': {}}, function(classes) {
                 var fTime = day + ":" + time;//formatted time is dayIndex:hour:minute
-                console.log(fTime);
-                console.log(classes.classList[editedId].classTimes);
-                console.log(classes.classList[editedId].classTimes.includes(fTime));
                 // only add if not already included
                 if (!classes.classList[editedId].classTimes.includes(fTime)) {
                     var updatedClassList = classes.classList;
                     // db update
                     updatedClassList[editedId].classTimes.push(fTime);
                     chrome.storage.sync.set({'classList': updatedClassList}, function() {
-                        // visual update
+                        // visual update - rerender timeblocks
                         $("#savetimemsg").css("color", "#1E90FF");
                         $("#savetimemsg").text("Saved time!");
+                        renderSchedule(editedId);
                     });
                 } else {
                     $("#savetimemsg").css("color", "red");
@@ -251,6 +290,21 @@ $(function() {
             $("#savetimemsg").text("Invalid time!");
         }
     })
+
+    // save password
+    $('#savepass').click(function() {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var updatedPassword = $('#password').val();
+            var classId = $('#editmodal').prop('name');
+            var updatedClassList = classes.classList;
+            updatedClassList[classId].password = updatedPassword;
+            chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                $("#savepassmsg").css("color", "#1E90FF");
+                $("#savepassmsg").text("Saved password!")
+            });
+        })
+    })
+
 })
 
 function getWeekday(dayIndex) {
@@ -263,6 +317,15 @@ function getWeekday(dayIndex) {
     weekday[5] = "Friday";
     weekday[6] = "Saturday";
     return weekday[dayIndex];
+}
+
+function formatTime(time) {
+    // time is a string in DayIndex:Hour:Minute
+    var day = getWeekday(time[0]);
+    var hour = time[1]%12 ? time[1]%12 : 12;
+    var min = time[2];
+    var meridiem = time[1]/12 ? "PM" : "AM";
+    return day + " @ " + hour + ":" + min + " " + meridiem;
 }
 
 function saveName(classId, updatedName) {
