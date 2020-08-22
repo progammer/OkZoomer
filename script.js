@@ -173,6 +173,8 @@ $(function() {
             // previous items: set filled values to default values
             $('#scheduledtimes').empty();
             $('#password').attr("value", "");
+            $('#savetimemsg').text('');
+            $('#savepassmsg').text('');
             $('#autojointoggle').prop('checked', false);
             $('#remindtoggle').prop('checked', false);
             // Render the edit menu 
@@ -205,7 +207,7 @@ $(function() {
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             var meeting = classes.classList[classId];
             if(meeting.classTimes.length != 0) {
-                $('#notimes').hide();
+                $('#schedulemsg').text(" - Click to Delete");
                 for (var i = 0; i < meeting.classTimes.length; i++) {
                     var timeElement = document.createElement("li");
                     timeElement.className = "classtime clickable list-group-item";
@@ -214,6 +216,8 @@ $(function() {
                     timeElement.innerText = fTime;
                     $("#scheduledtimes")[0].appendChild(timeElement);
                 }
+            } else {
+                $('#schedulemsg').text(" - None Yet!")
             }
         })
     }
