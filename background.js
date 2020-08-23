@@ -5,6 +5,7 @@ var secondsOffset = (new Date()).getSeconds();
 setTimeout(startHandle, minuteInMs - secondsOffset * 1000);
 
 function startHandle() {
+    handleTiming();
     console.log((minuteInMs/1000 - secondsOffset) + " elapsed");
     setInterval(handleTiming, minuteInMs);
 }
@@ -27,7 +28,22 @@ function handleTiming() {
 
             var meetingName = meeting.className;
             var url = `zoommtg://zoom.us/join?action=join&confno=${key}`;
-            url += meeting.password ? `&${meeting.password}` : '';
+
+            var password = meeting.password;
+            // encodeURIComponent() will not encode: ~!*()'
+            if (password) {
+                password = encodeURIComponent(password);
+                /**
+                password.replace('~', '%7E');
+                password.replace('!', '%21');
+                password.replace('*', '%2A');
+                password.replace('(', '%28');
+                password.replace(')', '%29');            
+                password.replace("'", '%27');
+                 */
+                url += password ? `&pwd=${password}` : '';
+            }
+
 
             // early notif
             for (var i = 0; i < schedule.length; i++) {

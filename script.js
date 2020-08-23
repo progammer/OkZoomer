@@ -79,8 +79,12 @@ $(function() {
 
         // Get potential password
         chrome.storage.sync.get({'classList': {}}, function(classes) {
-            classList = classes.classList;
-            var password = classList[classId].password;
+            var password = classes.classList[classId].password;
+            // encodeURIComponent() will not encode: ~!*()' but doesn't matter???
+            if (password) {
+                password = encodeURIComponent(password);
+            }
+
             joinLink += password ? `&pwd=${password}` : "";
             window.open(joinLink);
         })
