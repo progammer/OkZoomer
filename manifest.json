@@ -1,6 +1,6 @@
 {
   "name": "OK Zoomer",
-  "version": "1.1",
+  "version": "1.2",
   "description": "OK Zoomer is a clean and lightweight portal for accessing Zoom meetings.",
   "permissions": ["storage", "notifications"],
 
