@@ -42,6 +42,11 @@ footer.darkmode {
     transition: all 0.2s;
 }
 
+#nav {
+    background-color: white;
+    transition: all 0.4s;
+}
+
 #nav.darkmode, .modal-content.darkmode, footer.darkmode {
     color: white; 
     background-color: #111; 

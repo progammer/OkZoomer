@@ -24,30 +24,37 @@ function handleTiming() {
     var futureTime = formatTime(future); // + ":" + now.getSeconds();
     console.log("now: " + nowTime + ", future: " + futureTime);
 
-    chrome.storage.sync.get({'classList': {}}, function(classes) {
+    chrome.storage.sync.get({'classList': {}, 'notifNum': 0}, function(classes) {
         var keys = Object.keys(classes.classList);
+        var notifNum = classes.notifNum;
         keys.forEach((key) => {
             var meeting = classes.classList[key];
             var schedule = meeting.classTimes;
 
             var meetingName = meeting.className;
-            var url = `zoommtg://zoom.us/join?action=join&confno=${key}`;
+            
+            var url = '';
 
-            var password = meeting.password;
-            // encodeURIComponent() will not encode: ~!*()'
-            if (password) {
-                password = encodeURIComponent(password);
-                /**
-                password.replace('~', '%7E');
-                password.replace('!', '%21');
-                password.replace('*', '%2A');
-                password.replace('(', '%28');
-                password.replace(')', '%29');            
-                password.replace("'", '%27');
-                 */
-                url += password ? `&pwd=${password}` : '';
+            if (meeting.isLink) {
+                url = key;
+            } else {
+                url = `zoommtg://zoom.us/join?action=join&confno=${key}`;
+                var password = meeting.password;
+                // encodeURIComponent() will not encode: ~!*()'
+                if (password) {
+                    password = encodeURIComponent(password);
+                    /**
+                    password.replace('~', '%7E');
+                    password.replace('!', '%21');
+                    password.replace('*', '%2A');
+                    password.replace('(', '%28');
+                    password.replace(')', '%29');            
+                    password.replace("'", '%27');
+                     */
+                    url += password ? `&pwd=${password}` : '';
+                }
             }
-
+            
             // early notif
             for (var i = 0; i < schedule.length; i++) {
                 // console.log(schedule[i]);
@@ -59,7 +66,8 @@ function handleTiming() {
                         title:"OK Zoomer | Meeting Reminder",
                         message:`${meetingName} is starting in ${minutesInAdvance} minutes!`,
                     };
-                    chrome.notifications.create("remind-notif", notifOptions);
+                    chrome.notifications.create("remind-notif" + notifNum, notifOptions);
+                    notifNum++;
                 }
 
                 /**
@@ -80,10 +88,12 @@ function handleTiming() {
                         title:"OK Zoomer | Meeting Starting",
                         message:`"${meetingName} is starting now! (auto-joining)`,
                     };
-                    chrome.notifications.create("join-notif", notifOptions);
+                    chrome.notifications.create("join-notif" + notifNum, notifOptions);
+                    notifNum++;
                     window.open(url);
                 }
             }
         })
+        chrome.storage.sync.set({'notifNum': notifNum});
     })
 }

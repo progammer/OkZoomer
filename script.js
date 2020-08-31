@@ -64,7 +64,7 @@ $(function() {
                     if (keys.length == 0) {
                         $("#absence").css('display', 'flex');
                     }
-                    console.log('successfully removed meeting #' + classRow.id);
+                    console.log('successfully removed meeting ' + classRow.id);
                 });
             }
         })
@@ -75,28 +75,71 @@ $(function() {
     // Join class
     $("#classlist").on("click", ".join", function(){
         var classId = $(this).text().replace(/\s/g, '');
-        var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
+        var link = $(this).attr("data-content");
 
-        // Get potential password
         chrome.storage.sync.get({'classList': {}}, function(classes) {
-            var password = classes.classList[classId].password;
-            // encodeURIComponent() will not encode: ~!*()' but doesn't matter???
-            if (password) {
-                password = encodeURIComponent(password);
-            }
 
-            joinLink += password ? `&pwd=${password}` : "";
-            window.open(joinLink);
+            if (classes.classList[classId]) { // will be "meeting link" -> blank if is a link
+                var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
+                // Get potential password
+                var password = classes.classList[classId].password;
+                // encodeURIComponent() will not encode: ~!*()' but doesn't matter???
+                if (password) {
+                    password = encodeURIComponent(password);
+                }
+                joinLink += password ? `&pwd=${password}` : "";
+                //console.log(joinLink);
+                window.open(joinLink);
+            } else {
+                //console.log(link);
+                window.open(link);
+            }
         })
 
         // chrome get asynchronous cannot define behavior/modify link to join 'after'
     });
 
     // Enter key procs submit
+    $('#classLink, #linkClassName').keypress(function(e){
+        if(e.keyCode==13)
+        $('#enterClassLink').click();
+    });
+
     $('#classId, #className').keypress(function(e){
         if(e.keyCode==13)
         $('#enterClassId').click();
     });
+
+    // Submit link
+    $('#enterClassLink').click(function() {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var updatedClassList = classes.classList;
+            var newClassLink = $('#classLink').val();
+            if (updatedClassList.hasOwnProperty(newClassLink)) {
+                console.log('class ' + newClassLink + ' already exists');
+                $('#add-link-error-message').text('Meeting Link already exists!');
+            } else {
+                updatedClassList[newClassLink] = {
+                    className: $('#linkClassName').val() == "" ? "Meeting Link" : $("#linkClassName").val(),
+                    classTimes: [],
+                    password: "",
+                    autojoin: false,
+                    remind: false, // future: implement customizable value
+                    isLink: true,
+                };
+
+                // database update
+                chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                    console.log('classList has been updated: added ' + newClassLink);
+                });
+
+                // visual update
+                $("#absence").css('display', 'none');
+                addClassDisplay(updatedClassList, newClassLink);
+                $('#addLinkModal').modal('hide');
+            }
+        })
+    })
 
     // Submit class id
     $('#enterClassId').click(function() {
@@ -126,6 +169,7 @@ $(function() {
                         password: "",
                         autojoin: false,
                         remind: false, // future: implement customizable value
+                        isLink: false,
                     };
 
                     // database update
@@ -172,6 +216,7 @@ $(function() {
     $('#classlist').on("click", ".edit", function() {
         var parentId = $(this).parent()[0].id; // class [classrow] id
         var previousId = $('#editmodal').prop('name'); 
+        console.log('previous: ' + previousId + ", now: " + parentId);
         // prevent unnecessary reloading
         if (parentId != previousId) {
             // previous items: set filled values to default values
@@ -181,17 +226,20 @@ $(function() {
             $('#savepassmsg').text('');
             $('#autojointoggle').prop('checked', false);
             $('#remindtoggle').prop('checked', false);
+            //$('#remindtime').hide();
             // Render the edit menu 
             $('#editmodal').prop('name', parentId); // content block
-            $('#editmodal').children(".modal-header").children(".modal-title").text('Editing #' + parentId);
+            
             console.log('Currently editing #' + $('#editmodal').prop('name'));
             chrome.storage.sync.get({'classList': {}}, function(classes) {
                 var meeting = classes.classList[parentId];
+
                 if (meeting.autojoin) {
                     $('#autojointoggle').prop('checked', true);
                 }
                 if (meeting.remind) {
                     $('#remindtoggle').prop('checked', true);
+                    //$('#remindtime').show();
                 }
                 if (meeting.password) {
                     $('#password').attr("spellcheck", false);
@@ -200,6 +248,15 @@ $(function() {
                     $('#password').select();
                     $('#password').blur();
                 }
+                
+                if (meeting.isLink) {
+                    $('#editpasscontainer').css('display', 'none');
+                    $('#editmodal').children(".modal-header").children(".modal-title").html('Editing Link <br><span style="font-size:small">' + parentId + '</span>');
+                } else {
+                    $('#editpasscontainer').css('display', 'block'); 
+                    $('#editmodal').children(".modal-header").children(".modal-title").text('Editing Zoom #' + parentId);
+                }
+
             })
             renderSchedule(parentId);
         }
@@ -243,7 +300,7 @@ $(function() {
             var editedId = $('#editmodal').prop('name');
             updatedClassList[editedId].remind = !classes.classList[editedId].remind;
             chrome.storage.sync.set({'classList': updatedClassList}, function() {
-                console.log(editedId + " now has remind set to " + updatedClassList[editedId].autojoin);
+                console.log(editedId + " now has remind set to " + updatedClassList[editedId].remind);
             })
         })
     });
@@ -363,9 +420,16 @@ function addClassDisplay(classList, classId) {
     var classButton = document.createElement("button");
     classButton.className = "btn btn-primary btn-block join";
     classButton.style = "display: flex;align-items: center;justify-content: center;";
-    var mk2 = classId.length == 11 ? 7 : 6;
-    classButton.innerText = classId.substring(0, 3) + " " + classId.substring(3, mk2)
-    + " " + classId.substring(mk2, 11);
+
+    if (classList[classId].isLink) {
+        classButton.setAttribute("data-content", classId);
+        classButton.innerText = 'Meeting Link';
+    } else {
+        var mk2 = classId.length == 11 ? 7 : 6;
+        classButton.innerText = classId.substring(0, 3) + " " + classId.substring(3, mk2)
+        + " " + classId.substring(mk2, 11);
+    }
+
     var temp = document.createElement("td");
     temp.className = "col-5";
     temp.appendChild(classButton);

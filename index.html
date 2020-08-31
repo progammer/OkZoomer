@@ -27,12 +27,22 @@
         <div style="display:flex; width:100%; margin: 0 auto">
             <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
                     <div id="add" class="clickable" style="text-align:left" data-toggle="modal" data-target="#addModal">
-                         Add Meeting <i class="fas fa-plus"></i>
+                        Add Zoom <i class="fas fa-plus"></i>
                     </div>
             </div>
             <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
-                    <div id="cleardb" class="clickable" style="text-align:right">
-                        Clear all <i class="far fa-trash-alt"></i>
+                    <div id="add" class="clickable" style="text-align:left" data-toggle="modal" data-target="#addLinkModal">
+                        Add Link <i class="fas fa-link"></i>
+                    </div>
+            </div>
+            <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
+                    <div id="cleardb" class="clickable" style="text-align:middle">
+                        Clear Data <i class="far fa-trash-alt"></i>
+                    </div>
+            </div>
+            <div style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;">
+                    <div class="clickable" style="text-align:right" data-toggle="modal" data-target="#helpModal">
+                        Need Help? <i class="fas fa-question-circle"></i>
                     </div>
             </div>
         </div>
@@ -41,7 +51,7 @@
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content" style="width:75%">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add Meeting</h4>
+                    <h4 class="modal-title">Add Zoom Meeting</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i> 
                     </button>
@@ -66,10 +76,74 @@
             </div>
         </div>
         </div>
+
+        <div class="modal fade" id="addLinkModal" role="dialog" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="width:75%">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Meeting Link</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i> 
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="md-form">
+                    <i class="fas fa-hashtag prefix grey-text"></i>
+                    <input type="text" id="classLink" class="form-control">
+                    <label for="classLink">Meeting Link (required)</label>
+                    </div>
+
+                    <div class="md-form">
+                    <i class="fas fa-pencil-alt prefix grey-text"></i>
+                    <input type="text" id="linkClassName" class="form-control">
+                    <label for="linkClassName">Meeting Name (recommended)</label>
+                    </div>
+
+                    <button class="btn btn-primary btn-sm" id="enterClassLink">Submit</button>
+                    <span id="add-link-error-message" style="color: red"></span> 
+                </div>
+            </div>
+        </div>
+        </div>
     </nav>
 
+    <div class="modal fade" id="helpModal" role="dialog" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="width:90%">
+            <div class="modal-header">
+                <h4 class="modal-title">Info</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <i class="fas fa-times"></i> 
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div>Welcome to OK Zoomer! To get started, click on [Add Zoom <i class="fas fa-plus"></i>]
+                or [Add Link <i class="fas fa-link"></i>] to add a meeting to your dashboard.
+                </div><br>
+                <div>[Add Zoom <i class="fas fa-plus"></i>] is built to support Zoom Meetings (which
+                are described by unique meeting IDs). Enter your meeting ID and submit to save it. 
+                </div><br>
+                <div>[Add Link <i class="fas fa-link"></i>] should be used for any other platforms (such as Microsoft
+                Teams or Blackboard Collaborate). Simply enter a valid link that gives access to the desired meeting. Also,
+                it is recommended that you name the meeting in the case that the link alone is nondescript.
+                </div><br>
+                <div>Once a meeting has been added to the dashboard, you can join it [big blue button], remove it 
+                [<i class="fas fa-minus-circle"></i>], edit its properties [<i class="fas fa-cog"></i>], or modify its 
+                name by selecting its containing field (unfocus to save).
+                </div><br>
+                <div>Within the edit field (accessible via a meeting's edit button [<i class="fas fa-cog"></i>]), you
+                can schedule meeting times by using the selector for a day/time and saving with [Save Time]. You can also
+                specify passwords for Zoom meetings and enable reminders/autojoin with their respective switches.
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div id="main">
-        <div id="absence" class="text-center">It's lonely here :(<br>Add a zoom link to get started!</div>
+        <div id="absence" class="text-center">It's lonely here :(<br>Add a meeting to get started!</div>
         <table id="classlist" class="table">
         </table>
     </div>
@@ -78,7 +152,7 @@
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div id="editmodal" class="modal-content" style="width:85%">
                 <div class="modal-header">
-                    <h4 class="modal-title">Edit Preferences</h4>
+                    <h4 class="modal-title" style="white-space: nowrap; width: 80%; overflow: hidden;text-overflow: ellipsis;">Edit Preferences</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i> 
                     </button>
@@ -87,13 +161,21 @@
                 <div class="modal-body">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="autojointoggle">
-                        <label class="custom-control-label" for="autojointoggle">Auto-Join</label>
+                        <label class="custom-control-label" for="autojointoggle">Auto-Join on scheduled time(s)</label>
                     </div>
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="remindtoggle">
-                        <label class="custom-control-label" for="remindtoggle">5 Minute Remind</label>
+                        <label class="custom-control-label" for="remindtoggle">Get Notifications</label> 
                     </div>
 
+                    <!--
+                    <div class="md-form" id='remindtime'>
+                        <input type="number" id="numberExample" class="form-control">
+                        <label for="numberExample">reminder: minutes in advance</label>
+                    </div>
+                    -->
+
+                    <h3>Schedule a Time</h3>
                     <select id="dayselect" class="form-control form-control-sm">
                         <option value="-1">--</option>
                         <option value="0">Sunday</option>
@@ -114,13 +196,14 @@
                     <ul id="scheduledtimes" class="list-group list-group-flush">
                     </ul>
 
-                    <div class="md-form">
+                    <div class="md-form" id="editpasscontainer">
                         <i class="fas fa-key prefix grey-text"></i>
                         <input type="text" id="password" class="form-control">
                         <label for="password">Password (empty for none)</label>
+                        <button class="btn btn-primary btn-sm" id="savepass">Save Password</button>
+                        <span id="savepassmsg"></span>
                     </div>
-                    <button class="btn btn-primary btn-sm" id="savepass">Save Password</button>
-                    <span id="savepassmsg"></span>
+
                 </div>
             </div>
         </div>
