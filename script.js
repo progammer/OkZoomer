@@ -254,7 +254,7 @@ $(function() {
                     $('#editmodal').children(".modal-header").children(".modal-title").html('Editing Link <br><span style="font-size:small">' + parentId + '</span>');
                 } else {
                     $('#editpasscontainer').css('display', 'block'); 
-                    $('#editmodal').children(".modal-header").children(".modal-title").text('Editing Zoom #' + parentId);
+                    $('#editmodal').children(".modal-header").children(".modal-title").text('Editing #' + parentId);
                 }
 
             })
@@ -272,7 +272,7 @@ $(function() {
                 for (var i = 0; i < meeting.classTimes.length; i++) {
                     var timeElement = document.createElement("li");
                     timeElement.className = "classtime clickable list-group-item";
-                    timeElement.setAttribute("name", i);
+                    timeElement.setAttribute("data-id", i);
                     var fTime = formatTime(meeting.classTimes[i].split(":"));
                     timeElement.innerText = fTime;
                     $("#scheduledtimes")[0].appendChild(timeElement);
@@ -306,14 +306,13 @@ $(function() {
     });
 
     // remove a classtime
-    $('#editmodal').on('click', '.classtime', function () {
+    $('#editmodal').on('click', '.classtime', function (event) {
+        // THIS HAS TO BE OUTSIDE THE FREAKING SYNCHRONOUS METHOD CALL REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        var clickedIndex = $(this).data("id") 
+        var parentId = $('#editmodal').prop('name');
         chrome.storage.sync.get({'classList': {}}, function(classes) {
-            var clickedIndex = $(this).prop('name');
-            var parentId = $('#editmodal').prop('name');
-            
             // database update
-
-            console.log('removing ' + clickedIndex + ' from ' + parentId);
+            // console.log('removing ' + clickedIndex + ' from ' + parentId);
             if (classes.classList[parentId]) {
                 // db update
                 var updatedClassList = classes.classList;
@@ -331,6 +330,7 @@ $(function() {
         var editedId = $('#editmodal').prop('name');
         var day = $("#dayselect option:selected").val(); // -1 if invalid
         var time = $("#schedule").val(); // blank string if invalid
+        //console.log(time);
         if (day != -1 && time) {
             chrome.storage.sync.get({'classList': {}}, function(classes) {
                 var fTime = day + ":" + time;//formatted time is dayIndex:hour:minute
@@ -389,7 +389,8 @@ function formatTime(time) {
     var day = getWeekday(time[0]);
     var hour = time[1]%12 ? time[1]%12 : 12;
     var min = time[2];
-    var meridiem = time[1]/12 ? "PM" : "AM";
+    var meridiem = parseInt(time[1]/12) ? "PM" : "AM";
+    //console.log(time + " has " + (time[1])/12)
     return day + " @ " + hour + ":" + min + " " + meridiem;
 }
 
