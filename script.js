@@ -307,8 +307,8 @@ $(function() {
 
     // remove a classtime
     $('#editmodal').on('click', '.classtime', function (event) {
-        // THIS HAS TO BE OUTSIDE THE FREAKING SYNCHRONOUS METHOD CALL REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-        var clickedIndex = $(this).data("id") 
+        // THIS HAS TO BE OUTSIDE THE SYNCHRONOUS METHOD CALL REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        var clickedIndex = $(this).data("id");
         var parentId = $('#editmodal').prop('name');
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             // database update
