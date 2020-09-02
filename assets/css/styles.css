@@ -42,6 +42,14 @@ footer.darkmode {
     transition: all 0.2s;
 }
 
+hr {
+    background-color: black;
+}
+
+.darkmode hr {
+    background-color: grey;
+}
+
 #nav {
     background-color: white;
     transition: all 0.4s;

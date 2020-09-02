@@ -124,7 +124,8 @@ $(function() {
                     classTimes: [],
                     password: "",
                     autojoin: false,
-                    remind: false, // future: implement customizable value
+                    remind: false,
+                    remindTime: 0,
                     isLink: true,
                 };
 
@@ -226,7 +227,7 @@ $(function() {
             $('#savepassmsg').text('');
             $('#autojointoggle').prop('checked', false);
             $('#remindtoggle').prop('checked', false);
-            //$('#remindtime').hide();
+
             // Render the edit menu 
             $('#editmodal').prop('name', parentId); // content block
             
@@ -237,10 +238,17 @@ $(function() {
                 if (meeting.autojoin) {
                     $('#autojointoggle').prop('checked', true);
                 }
+
+                $('#remindinput').val('');
+                $('#remindtime').hide();
                 if (meeting.remind) {
                     $('#remindtoggle').prop('checked', true);
-                    //$('#remindtime').show();
+                    $('#remindtime').show();
+                    $('#remindinput').val(meeting.remindTime);
+                    $('#remindinput').select();
+                    $('#remindinput').blur();
                 }
+
                 if (meeting.password) {
                     $('#password').attr("spellcheck", false);
                     $('#password').attr("value", meeting.password);
@@ -298,6 +306,7 @@ $(function() {
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             var updatedClassList = classes.classList;
             var editedId = $('#editmodal').prop('name');
+            $('#remindtime').toggle();
             updatedClassList[editedId].remind = !classes.classList[editedId].remind;
             chrome.storage.sync.set({'classList': updatedClassList}, function() {
                 console.log(editedId + " now has remind set to " + updatedClassList[editedId].remind);
@@ -305,9 +314,20 @@ $(function() {
         })
     });
 
+    $('#remindinput').change(function() {
+        chrome.storage.sync.get({'classList': {}}, function(classes) {
+            var updatedClassList = classes.classList;
+            var editedId = $('#editmodal').prop('name');
+            updatedClassList[editedId].remindTime = $('#remindinput').val();
+            chrome.storage.sync.set({'classList': updatedClassList}, function() {
+                console.log(editedId + " now has remind time set to " + $('#remindinput').val());
+            })
+        })
+    })
+
     // remove a classtime
     $('#editmodal').on('click', '.classtime', function (event) {
-        // THIS HAS TO BE OUTSIDE THE SYNCHRONOUS METHOD CALL REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        // "THIS" CALLS HAVE TO BE OUTSIDE THE SYNCHRONOUS METHOD CALL REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
         var clickedIndex = $(this).data("id");
         var parentId = $('#editmodal').prop('name');
         chrome.storage.sync.get({'classList': {}}, function(classes) {

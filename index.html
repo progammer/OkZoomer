@@ -165,17 +165,17 @@
                     </div>
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="remindtoggle">
-                        <label class="custom-control-label" for="remindtoggle">Get Notifications</label> 
+                        <label class="custom-control-label" for="remindtoggle">Get Reminders (notifications)</label> 
                     </div>
-
-                    <!--
+                    
                     <div class="md-form" id='remindtime'>
-                        <input type="number" id="numberExample" class="form-control">
-                        <label for="numberExample">reminder: minutes in advance</label>
+                        <i class="fas fa-bell prefix grey-text"></i>
+                        <input type="number" id="remindinput" class="form-control">
+                        <label for="remindinput">minutes before meeting to get reminder</label>
                     </div>
-                    -->
+                    <hr>
 
-                    <h3>Schedule a Time</h3>
+                    <i class="fas fa-calendar-plus"></i> Schedule Times
                     <select id="dayselect" class="form-control form-control-sm">
                         <option value="-1">--</option>
                         <option value="0">Sunday</option>
@@ -190,13 +190,16 @@
 
                     <input type="time" id="schedule">
                     <button class="btn btn-primary btn-sm" id="savetime">Save Time</button>
-                    <span id="savetimemsg"></span><br>
+                    <span id="savetimemsg"></span>
+                    <hr>
 
-                    <i class="fas fa-calendar prefix grey-text"></i> Saved Meeting Times<span id="schedulemsg"> - None Yet!</span>
+                    <i class="fas fa-calendar"></i> Saved Meeting Times<span id="schedulemsg"> - None Yet!</span>
                     <ul id="scheduledtimes" class="list-group list-group-flush">
                     </ul>
-
+                    
+                    <hr>
                     <div class="md-form" id="editpasscontainer">
+
                         <i class="fas fa-key prefix grey-text"></i>
                         <input type="text" id="password" class="form-control">
                         <label for="password">Password (empty for none)</label>

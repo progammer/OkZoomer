@@ -1,5 +1,5 @@
 var minuteInMs = 60000;
-var minutesInAdvance = 5; // implement changeable with chrome storage
+//var minutesInAdvance = 5; // implement changeable with chrome storage
 
 var secondsOffset = (new Date()).getSeconds();
 setTimeout(startHandle, minuteInMs - secondsOffset * 1000);
@@ -20,13 +20,14 @@ function handleTiming() {
 
     var now = new Date();
     var nowTime = formatTime(now);
-    var future = new Date(now.getTime() + minutesInAdvance * minuteInMs); // 5 minutes later
-    var futureTime = formatTime(future); // + ":" + now.getSeconds();
-    console.log("now: " + nowTime + ", future: " + futureTime);
+
+    //for later
+    var nowGetTime = now.getTime();
 
     chrome.storage.sync.get({'classList': {}, 'notifNum': 0}, function(classes) {
         var keys = Object.keys(classes.classList);
-        var notifNum = classes.notifNum;
+        var notifNum = classes.notifNum; // to generate more than one notif, unique notif id's
+
         keys.forEach((key) => {
             var meeting = classes.classList[key];
             var schedule = meeting.classTimes;
@@ -34,6 +35,14 @@ function handleTiming() {
             var meetingName = meeting.className;
             
             var url = '';
+
+            // handle timing - TODO: move reminder to centralized location (prob want constant remind time anyways)
+            var minutesInAdvance = meeting.remindTime;
+            
+            var future = new Date(nowGetTime + minutesInAdvance * minuteInMs); // 5 minutes later
+            var futureTime = formatTime(future); // + ":" + now.getSeconds();
+            console.log(futureTime);
+            console.log("now: " + nowTime + ", future: " + futureTime);
 
             if (meeting.isLink) {
                 url = key;
@@ -58,7 +67,7 @@ function handleTiming() {
             // early notif
             for (var i = 0; i < schedule.length; i++) {
                 // console.log(schedule[i]);
-                // if reminders are enabled
+                // if reminders are enabled, create the notif
                 if (meeting.remind && futureTime==schedule[i]) {
                     var notifOptions = {
                         type:"basic",
