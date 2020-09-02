@@ -135,7 +135,9 @@
                 </div><br>
                 <div>Within the edit field (accessible via a meeting's edit button [<i class="fas fa-cog"></i>]), you
                 can schedule meeting times by using the selector for a day/time and saving with [Save Time]. You can also
-                specify passwords for Zoom meetings and enable reminders/autojoin with their respective switches.
+                specify passwords for Zoom meetings and enable reminders/autojoin with their respective switches. If you
+                choose to enable reminders, enter the number of minutes in advance you want to be notified. If you do not enter
+                a number (or enter an invalid number), know that this value will be defaulted to 5.
                 </div>
             </div>
         </div>
@@ -170,7 +172,7 @@
                     
                     <div class="md-form" id='remindtime'>
                         <i class="fas fa-bell prefix grey-text"></i>
-                        <input type="number" id="remindinput" class="form-control">
+                        <input type="number" id="remindinput" class="form-control" min="1" default="5">
                         <label for="remindinput">minutes before meeting to get reminder</label>
                     </div>
                     <hr>

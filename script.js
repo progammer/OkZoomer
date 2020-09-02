@@ -1,6 +1,16 @@
 // Submits -> Set Chrome API -> Chrome Storage -> Get Chrome API (repeat)
 $(function() {
 
+    // update db properties for new users
+    /** 
+    chrome.storage.sync.get({'classList': {}}, function(classes) {
+        var keys = Object.keys(classes.classList);
+        keys.forEach((key) => {
+            if (classes.classList[key].hasOwnProperty())
+        });
+    })
+    */
+
     var emojis = Array('&#128526;','&#9996;','&#129321;','&#129297;');
     //get random effect from effects array
     var emoji = emojis[Math.floor(Math.random()*emojis.length)];
@@ -169,7 +179,8 @@ $(function() {
                         classTimes: [],
                         password: "",
                         autojoin: false,
-                        remind: false, // future: implement customizable value
+                        remind: false,
+                        remindTime: 5,
                         isLink: false,
                     };
 
@@ -239,12 +250,11 @@ $(function() {
                     $('#autojointoggle').prop('checked', true);
                 }
 
-                $('#remindinput').val('');
+                $('#remindinput').val(meeting.remindTime);
                 $('#remindtime').hide();
                 if (meeting.remind) {
                     $('#remindtoggle').prop('checked', true);
                     $('#remindtime').show();
-                    $('#remindinput').val(meeting.remindTime);
                     $('#remindinput').select();
                     $('#remindinput').blur();
                 }
@@ -307,6 +317,8 @@ $(function() {
             var updatedClassList = classes.classList;
             var editedId = $('#editmodal').prop('name');
             $('#remindtime').toggle();
+            $('#remindinput').select();
+            $('#remindinput').blur();
             updatedClassList[editedId].remind = !classes.classList[editedId].remind;
             chrome.storage.sync.set({'classList': updatedClassList}, function() {
                 console.log(editedId + " now has remind set to " + updatedClassList[editedId].remind);
@@ -318,9 +330,12 @@ $(function() {
         chrome.storage.sync.get({'classList': {}}, function(classes) {
             var updatedClassList = classes.classList;
             var editedId = $('#editmodal').prop('name');
+            if ($('#remindinput').val() < 1) {
+                $('#remindinput').val(5);
+            }
             updatedClassList[editedId].remindTime = $('#remindinput').val();
             chrome.storage.sync.set({'classList': updatedClassList}, function() {
-                console.log(editedId + " now has remind time set to " + $('#remindinput').val());
+                console.log(editedId + " now has remind time set to " + updatedClassList[editedId].remindTime);
             })
         })
     })

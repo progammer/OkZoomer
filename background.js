@@ -37,11 +37,10 @@ function handleTiming() {
             var url = '';
 
             // handle timing - TODO: move reminder to centralized location (prob want constant remind time anyways)
-            var minutesInAdvance = meeting.remindTime;
+            var minutesInAdvance = meeting.remindTime > 0 ? meeting.remindTime : 5; // default to 5 if invalid (no number entered) - accomodates prev ver
             
-            var future = new Date(nowGetTime + minutesInAdvance * minuteInMs); // 5 minutes later
+            var future = new Date(nowGetTime + minutesInAdvance * minuteInMs); 
             var futureTime = formatTime(future); // + ":" + now.getSeconds();
-            console.log(futureTime);
             console.log("now: " + nowTime + ", future: " + futureTime);
 
             if (meeting.isLink) {
