@@ -135,7 +135,7 @@ $(function() {
                     password: "",
                     autojoin: false,
                     remind: false,
-                    remindTime: 0,
+                    remindTime: 5,
                     isLink: true,
                 };
 

@@ -10,8 +10,13 @@ function startHandle() {
     setInterval(handleTiming, minuteInMs);
 }
 
+// var test = new Date(2020, 9, 8, 9, 30, 30, 50);
+// console.log(formatTime(test));
+
 function formatTime(timeObject) {
-    return timeObject.getDay() + ":" + (timeObject.getHours()/10==0 ? "0" : "") + timeObject.getHours() + ":" + (timeObject.getMinutes()/10==0 ? "0" : "") + timeObject.getMinutes(); 
+    return timeObject.getDay() + ":" 
+        + (parseInt(timeObject.getHours()/10)==0 ? "0" : "") + timeObject.getHours() + ":" 
+        + (parseInt(timeObject.getMinutes()/10)==0 ? "0" : "") + timeObject.getMinutes(); 
 }
 
 function handleTiming() {
@@ -36,9 +41,9 @@ function handleTiming() {
             
             var url = '';
 
+            console.log(key + " has " + meeting.remindTime);
             // handle timing - TODO: move reminder to centralized location (prob want constant remind time anyways)
-            var minutesInAdvance = meeting.remindTime > 0 ? meeting.remindTime : 5; // default to 5 if invalid (no number entered) - accomodates prev ver
-            
+            var minutesInAdvance = meeting.remindTime > 0 ? meeting.remindTime : 5;
             var future = new Date(nowGetTime + minutesInAdvance * minuteInMs); 
             var futureTime = formatTime(future); // + ":" + now.getSeconds();
             console.log("now: " + nowTime + ", future: " + futureTime);
