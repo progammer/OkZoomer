@@ -2,7 +2,7 @@
 $(function() {
 
     // update db properties for new users
-    /** 
+    /**
     chrome.storage.sync.get({'classList': {}}, function(classes) {
         var keys = Object.keys(classes.classList);
         keys.forEach((key) => {
@@ -58,8 +58,8 @@ $(function() {
         $('body, #nav, .modal-content, .table, footer').toggleClass("darkmode");
     });
 
-     
-    // Delete Class 
+
+    // Delete Class
     $("#classlist").on("click", ".del", function() {
         var classRow = $(this).parent()[0];
         // database update
@@ -88,22 +88,32 @@ $(function() {
         var link = $(this).attr("data-content");
 
         chrome.storage.sync.get({'classList': {}}, function(classes) {
-
+            let joinLink = '';
             if (classes.classList[classId]) { // will be "meeting link" -> blank if is a link
-                var joinLink = `zoommtg://zoom.us/join?action=join&confno=${classId}`;
+                joinLink += `zoommtg://zoom.us/join?action=join&confno=${classId}`;
                 // Get potential password
-                var password = classes.classList[classId].password;
+                let password = classes.classList[classId].password;
                 // encodeURIComponent() will not encode: ~!*()' but doesn't matter???
                 if (password) {
                     password = encodeURIComponent(password);
+                    joinLink += `&pwd=${password}`;
                 }
-                joinLink += password ? `&pwd=${password}` : "";
-                //console.log(joinLink);
-                window.open(joinLink);
-            } else {
-                //console.log(link);
-                window.open(link);
             }
+            else if(link.includes('zoom')){//If it's a Zoom link, use credentials to join meeting with zoommtg://
+              let meetingId = link.split('zoom.us/j/')[1].split('?pwd=')[0];
+              let splitLink = link.split('?pwd=')[1];
+
+              //If there is a password field in the URL
+              if(splitLink != undefined){
+                let password = splitLink.split('#success')[0];
+                joinLink += `zoommtg://zoom.us/join?action=join&confno=${meetingId}&pwd=${password}`;
+              }
+              else{
+                joinLink += `zoommtg://zoom.us/join?action=join&confno=${meetingId}`;
+              }
+            }
+
+            window.open(joinLink);
         })
 
         // chrome get asynchronous cannot define behavior/modify link to join 'after'
@@ -227,7 +237,7 @@ $(function() {
     // Toggle the edit menu
     $('#classlist').on("click", ".edit", function() {
         var parentId = $(this).parent()[0].id; // class [classrow] id
-        var previousId = $('#editmodal').prop('name'); 
+        var previousId = $('#editmodal').prop('name');
         console.log('previous: ' + previousId + ", now: " + parentId);
         // prevent unnecessary reloading
         if (parentId != previousId) {
@@ -239,9 +249,9 @@ $(function() {
             $('#autojointoggle').prop('checked', false);
             $('#remindtoggle').prop('checked', false);
 
-            // Render the edit menu 
+            // Render the edit menu
             $('#editmodal').prop('name', parentId); // content block
-            
+
             console.log('Currently editing #' + $('#editmodal').prop('name'));
             chrome.storage.sync.get({'classList': {}}, function(classes) {
                 var meeting = classes.classList[parentId];
@@ -262,16 +272,16 @@ $(function() {
                 if (meeting.password) {
                     $('#password').attr("spellcheck", false);
                     $('#password').attr("value", meeting.password);
-                    // the following is included so the label rides above 
+                    // the following is included so the label rides above
                     $('#password').select();
                     $('#password').blur();
                 }
-                
+
                 if (meeting.isLink) {
                     $('#editpasscontainer').css('display', 'none');
                     $('#editmodal').children(".modal-header").children(".modal-title").html('Editing Link <br><span style="font-size:small">' + parentId + '</span>');
                 } else {
-                    $('#editpasscontainer').css('display', 'block'); 
+                    $('#editpasscontainer').css('display', 'block');
                     $('#editmodal').children(".modal-header").children(".modal-title").text('Editing #' + parentId);
                 }
 
